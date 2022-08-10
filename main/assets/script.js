@@ -1,28 +1,106 @@
-// Current Day
-$("#currentDay").text(moment().format("dddd, MMMM Do"));
+// today = moment();
+// currentTime = IdentifyCurrentTime();
+// let dayInfoArray = [];
+// let savedEventInfoArray = [];
 
-// render working blocks
-const workingBlock = $("#timeBlock");
-const renderWorkingBlock = (hour) => {
-  console.log(hour);
-  const timeBlock = `<div class="row p-2 my 2 ${getClassName(container.key)}">
-  <div class="col-md-1 col-sm-12 text-center my-1 d-flex flex-column justify-content-center">${
-    container.label
-  }</div>
-  <textarea data-info=${
-    container.key
-  } class="col-md-9 col-sm-12" rows="3">${getEventForTimeBlock(
-    workingHour.key
-  )}</textarea>
-  <div class="col-md-2 col-sm-12 text-center my-1 d-flex flex-column justify-content-center">
-    <button type="button" data-hour=${
-      container.key
-    } class="btn btn-outline-success">Save</button>
-  </div>`;
+// // Current Day displayed in header
+// function displayCurrentDayInfo() {
+//   $("#currentDay").text(moment().format("dddd, MMMM Do"));
+//   updateCurrentTimeTimer();
+//   colourCodeTextArea();
+//   populateInfoForSavedEvents();
+// }
 
-  //append to parent time block
-  workingBlock.append(timeBlock);
-};
-container.forEach(renderTimeBlock);
+// // current time
+// function IdentifyCurrentTime() {
+//   currentHour = today.format("HH");
+//   return currentHour;
+// }
+// //check current time
+// function updateCurrentTimeTimer() {
+//   setInterval(IdentifyCurrentTime, 60000);
+//   colourCodeInputBox();
+// }
+// // colour code time blocks
+// function colourCodeInputBox() {
+//   $(".row").each(function () {
+//     let blockTime = $(this).children(".hour").attr("data-time");
+//     if (blockTime == currentTime) {
+//       $(this).children("textarea").addClass("present");
+//     } else if (blockTime < currentTime) {
+//       $(this).children("textarea").addClass("past");
+//     } else {
+//       $(this).children("textarea").addClass("future");
+//     }
+//   });
+// }
+// //add saved input to relevant input box
 
-workingBlocks.on("click", handleSave);
+// function addSavedInfo() {
+//   if (localStorage.getItem("eventInformation") !== null) {
+//     savedEventInfoArray = JSON.parse(localStorage.getItem("eventInformation"));
+//     $.each(savedEventInfoArray, function () {
+//       timeBlock = this.timeBlockID;
+//       eventInfo = this.eventInfoText;
+//       timeBlockElement = $(`.hour[data-time="${timeBlock}"]`);
+//       timeBlockElement.siblings("textarea").val(eventInfo);
+//     });
+//   } else {
+//     return;
+//   }
+// }
+
+// //save input info to local storage
+// function saveEvent(event) {
+//   let timeBlockID = $(event.currentTarget).siblings(".hour").attr("data-time");
+//   let eventInfoText = $(event.currentTarget).siblings("textarea").val();
+
+//   if (localStorage.getItem("eventInformation") !== null) {
+//     dayInfoArray = JSON.parse(localStorage.getItem("eventInformation"));
+
+//     // remove info previously saved
+
+//     function removePreviouslySavedInfo(item) {
+//       if (item.timeBlockID !== timeBlockID) {
+//         return true;
+//       }
+//       return false;
+//     }
+//     let cleansedEventInfoArray = savedEventInfoArray.filter(
+//       removePreviouslySavedInfo
+//     );
+//     let newEventInfoObject = {
+//       timeBlockID,
+//       eventInfoText,
+//     };
+//     cleansedEventInfoArray.push(newEventInfoObject);
+//     let newEventInfoString = JSON.stringify(cleansedEventInfoArray);
+//     localStorage.setItem("eventInformation", newEventInfoString);
+
+//     // destroy object text
+//     $(event.currentTarget).siblings("textarea").val(" ");
+//     //populate event info back onto page after 1.5secs
+//     setTimeout(() => {
+//       populateInfoForSavedEvents();
+//     }, 1500);
+//   } else {
+//     let eventInfoObject = {
+//       timeBlockID,
+//       eventInfoText,
+//     };
+
+//     eventInfoArray.push(eventInfoObject);
+//     let eventInfoString = JSON.stringify(eventInfoArray);
+//     localStorage.setItem("eventInformation", eventInfoString);
+
+//     // destroy object text
+//     $(event.target).siblings("textarea").val(" ");
+//     //populate event info back onto page after 1.5secs
+//     setTimeout(() => {
+//       populateInfoForSavedEvents();
+//     }, 1500);
+//   }
+// }
+
+// $("document").ready(displayCurrentDayInfo);
+// $(".container").on("click", "button", saveEvent);

@@ -1,60 +1,110 @@
-$(document).ready(function () {
-  // listen for save button clicks
-  $(".saveBtn").on("click", function () {
-    // get nearby values
-    var value = $(this).siblings(".description").val();
-    var time = $(this).parent().attr("id");
+today = moment();
+currentTime = identifyCurrentTime();
+let eventInfoArray = [];
+let savedEventInfoArray = [];
 
-    // save in localStorage
-    localStorage.setItem(time, value);
+//populate day information in the header
+function populateCurrentDayInformation() {
+  $("#currentDay").text(today.format("Do [of] MMM YYYY"));
+  updateCurrentTimeTimer();
+  colourCodeTextArea();
+  populateInfoForSavedEvents();
+}
 
-    // Show notification that item was saved to localStorage by adding class 'show'
-    $(".notification").addClass("show");
+// identify current time
+function identifyCurrentTime() {
+  currentHour = today.format("HH");
+  return currentHour;
+}
 
-    // Timeout to remove 'show' class after 5 seconds
-    setTimeout(function () {
-      $(".notification").removeClass("show");
-    }, 5000);
+//every minute check what the current time is
+function updateCurrentTimeTimer() {
+  setInterval(identifyCurrentTime, 60000);
+  colourCodeTextArea();
+}
+
+//colour code time blocks for past/present/future events
+function colourCodeTextArea() {
+  $(".row").each(function () {
+    let blockTime = $(this).children(".hour").attr("data-time");
+
+    if (blockTime == currentTime) {
+      $(this).children("textarea").addClass("present");
+    } else if (blockTime < currentTime) {
+      $(this).children("textarea").addClass("past");
+    } else {
+      $(this).children("textarea").addClass("future");
+    }
   });
+}
 
-  function hourUpdater() {
-    // get current number of hours
-    var currentHour = moment().hours();
-
-    // loop over time blocks
-    $(".time-block").each(function () {
-      var blockHour = parseInt($(this).attr("id").split("-")[1]);
-
-      // check if we've moved past this time
-      if (blockHour < currentHour) {
-        $(this).addClass("past");
-      } else if (blockHour === currentHour) {
-        $(this).removeClass("past");
-        $(this).addClass("present");
-      } else {
-        $(this).removeClass("past");
-        $(this).removeClass("present");
-        $(this).addClass("future");
-      }
+//add saved event information to relevant text areas
+function populateInfoForSavedEvents() {
+  if (localStorage.getItem("eventInformation") !== null) {
+    savedEventInfoArray = JSON.parse(localStorage.getItem("eventInformation"));
+    $.each(savedEventInfoArray, function () {
+      timeBlock = this.timeBlockID;
+      eventInfo = this.eventInfoText;
+      timeBlockElement = $(`.hour[data-time="${timeBlock}"]`);
+      timeBlockElement.siblings("textarea").val(eventInfo);
     });
+  } else {
+    return;
   }
+}
 
-  hourUpdater();
+//save the event info input into local storage
+function saveEvent(event) {
+  let timeBlockID = $(event.currentTarget).siblings(".hour").attr("data-time");
+  let eventInfoText = $(event.currentTarget).siblings("textarea").val();
 
-  // set up interval to check if current time needs to be updated
-  var interval = setInterval(hourUpdater, 15000);
+  if (localStorage.getItem("eventInformation") !== null) {
+    eventInfoArray = JSON.parse(localStorage.getItem("eventInformation"));
 
-  // load any saved data from localStorage
-  $("#hour-9 .description").val(localStorage.getItem("hour-9"));
-  $("#hour-10 .description").val(localStorage.getItem("hour-10"));
-  $("#hour-11 .description").val(localStorage.getItem("hour-11"));
-  $("#hour-12 .description").val(localStorage.getItem("hour-12"));
-  $("#hour-13 .description").val(localStorage.getItem("hour-13"));
-  $("#hour-14 .description").val(localStorage.getItem("hour-14"));
-  $("#hour-15 .description").val(localStorage.getItem("hour-15"));
-  $("#hour-16 .description").val(localStorage.getItem("hour-16"));
-  $("#hour-17 .description").val(localStorage.getItem("hour-17"));
+    // remove object with event info previously saved for that time block
+    function removePreviouslySavedEventInfo(item) {
+      if (item.timeBlockID !== timeBlockID) {
+        return true;
+      }
+      return false;
+    }
+    let cleansedEventInfoArray = savedEventInfoArray.filter(
+      removePreviouslySavedEventInfo
+    );
 
-  // display current day on page
-  $("#currentDay").text(moment().format("dddd, MMMM Do"));
-});
+    let newEventInfoObject = {
+      timeBlockID,
+      eventInfoText,
+    };
+
+    cleansedEventInfoArray.push(newEventInfoObject);
+    let newEventInfoString = JSON.stringify(cleansedEventInfoArray);
+    localStorage.setItem("eventInformation", newEventInfoString);
+
+    // destroy object text
+    $(event.currentTarget).siblings("textarea").val(" ");
+    //populate event info back onto page after 1.5secs
+    setTimeout(() => {
+      populateInfoForSavedEvents();
+    }, 1500);
+  } else {
+    let eventInfoObject = {
+      timeBlockID,
+      eventInfoText,
+    };
+
+    eventInfoArray.push(eventInfoObject);
+    let eventInfoString = JSON.stringify(eventInfoArray);
+    localStorage.setItem("eventInformation", eventInfoString);
+
+    // destroy object text
+    $(event.target).siblings("textarea").val(" ");
+    //populate event info back onto page after 1.5secs
+    setTimeout(() => {
+      populateInfoForSavedEvents();
+    }, 1500);
+  }
+}
+
+$("document").ready(populateCurrentDayInformation);
+$(".container").on("click", "button", saveEvent);
